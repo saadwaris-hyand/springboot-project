@@ -33,8 +33,6 @@ public class TicketDTO {
     @NotBlank(message = "Responsible must not be empty")
     private String responsible;
 
-    // ----------- Type-specific fields (optional at first) -----------
-
     // INCIDENT
     private String category;
     private String impact;

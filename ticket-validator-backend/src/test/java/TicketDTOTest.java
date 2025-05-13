@@ -44,10 +44,10 @@ public class TicketDTOTest {
 
     @Test
     void testMissingRequiredFields_ShouldFailValidation() {
-        TicketDTO ticket = new TicketDTO(); // Empty object
+        TicketDTO ticket = new TicketDTO();
         Set<ConstraintViolation<TicketDTO>> violations = validator.validate(ticket);
 
-        assertEquals(6, violations.size()); // All 6 required fields should fail
+        assertEquals(6, violations.size());
 
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("type")));
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("system")));
@@ -74,7 +74,7 @@ public class TicketDTOTest {
     @Test
     void testInvalidPriority_ShouldFailValidation() {
         TicketDTO ticket = createValidTicket();
-        ticket.setPriority("URGENT"); // Not allowed
+        ticket.setPriority("URGENT");
 
         Set<ConstraintViolation<TicketDTO>> violations = validator.validate(ticket);
 

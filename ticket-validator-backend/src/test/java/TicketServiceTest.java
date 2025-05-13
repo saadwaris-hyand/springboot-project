@@ -29,7 +29,7 @@ public class TicketServiceTest {
         ticket.setCategory("Database");
         ticket.setImpact("Major");
 
-        Map<String, Object> result = ticketService.validateAndStore(ticket);
+        Map<String, Object> result = ticketService.validate(ticket);
 
         assertEquals("VALID", result.get("status"));
         assertEquals("Ticket is valid", result.get("message"));
@@ -42,12 +42,11 @@ public class TicketServiceTest {
         ticket.setCreatedDate(LocalDate.now());
         ticket.setPriority("LOW");
         ticket.setCategory("UI");
-        // No impact
 
-        Map<String, Object> result = ticketService.validateAndStore(ticket);
+        Map<String, Object> result = ticketService.validate(ticket);
 
         assertEquals("INVALID", result.get("status"));
-        List<String> errors = (List<String>) result.get("errors");
+        List<String> errors = extractErrorList(result.get("errors"));
         assertTrue(errors.contains("INCIDENT: impact is required"));
     }
 
@@ -60,7 +59,7 @@ public class TicketServiceTest {
         ticket.setPlannedExecutionDate(LocalDate.now().plusDays(3));
         ticket.setApprover("Alice");
 
-        Map<String, Object> result = ticketService.validateAndStore(ticket);
+        Map<String, Object> result = ticketService.validate(ticket);
 
         assertEquals("VALID", result.get("status"));
     }
@@ -70,12 +69,11 @@ public class TicketServiceTest {
         TicketDTO ticket = new TicketDTO();
         ticket.setType("CHANGE_REQUEST");
         ticket.setPlannedExecutionDate(LocalDate.now().plusDays(1));
-        // Missing approver
 
-        Map<String, Object> result = ticketService.validateAndStore(ticket);
+        Map<String, Object> result = ticketService.validate(ticket);
 
         assertEquals("INVALID", result.get("status"));
-        List<String> errors = (List<String>) result.get("errors");
+        List<String> errors = extractErrorList(result.get("errors"));
         assertTrue(errors.contains("CHANGE_REQUEST: approver is required"));
     }
 
@@ -89,7 +87,7 @@ public class TicketServiceTest {
         ticket.setMaintenanceWindowEnd(LocalDateTime.now().plusHours(3));
         ticket.setAffectedComponents(List.of("Server1", "DB1"));
 
-        Map<String, Object> result = ticketService.validateAndStore(ticket);
+        Map<String, Object> result = ticketService.validate(ticket);
 
         assertEquals("VALID", result.get("status"));
     }
@@ -99,13 +97,13 @@ public class TicketServiceTest {
         TicketDTO ticket = new TicketDTO();
         ticket.setType("MAINTENANCE");
         ticket.setMaintenanceWindowStart(LocalDateTime.now().plusHours(2));
-        ticket.setMaintenanceWindowEnd(LocalDateTime.now().plusHours(1)); // End before start
+        ticket.setMaintenanceWindowEnd(LocalDateTime.now().plusHours(1));
         ticket.setAffectedComponents(List.of("DB"));
 
-        Map<String, Object> result = ticketService.validateAndStore(ticket);
+        Map<String, Object> result = ticketService.validate(ticket);
 
         assertEquals("INVALID", result.get("status"));
-        List<String> errors = (List<String>) result.get("errors");
+        List<String> errors = extractErrorList(result.get("errors"));
         assertTrue(errors.contains("MAINTENANCE: start time must be before end time"));
     }
 
@@ -114,10 +112,10 @@ public class TicketServiceTest {
         TicketDTO ticket = new TicketDTO();
         ticket.setType("UNKNOWN_TYPE");
 
-        Map<String, Object> result = ticketService.validateAndStore(ticket);
+        Map<String, Object> result = ticketService.validate(ticket);
 
         assertEquals("INVALID", result.get("status"));
-        List<String> errors = (List<String>) result.get("errors");
+        List<String> errors = extractErrorList(result.get("errors"));
         assertTrue(errors.contains("Invalid ticket type"));
     }
 
@@ -137,13 +135,34 @@ public class TicketServiceTest {
     void testGetAllTicketsStoresCorrectly() {
         TicketDTO ticket = new TicketDTO();
         ticket.setType("INCIDENT");
+        ticket.setSystem("CRM");
+        ticket.setCreatedDate(LocalDate.now());
+        ticket.setPriority("HIGH");
+        ticket.setDescription("Login failure");
+        ticket.setResponsible("admin");
         ticket.setCategory("Network");
         ticket.setImpact("High");
 
-        ticketService.validateAndStore(ticket);
-        List<Map<String, Object>> allTickets = ticketService.getAllTickets();
+        Map<String, Object> result = ticketService.validate(ticket);
 
+        if ("VALID".equals(result.get("status"))) {
+            ticketService.storeValidResult(ticket);
+        } else {
+            List<String> errors = extractErrorList(result.get("errors"));
+            ticketService.storeRawResult(ticket, errors);
+        }
+
+        List<Map<String, Object>> allTickets = ticketService.getAllTickets();
         assertEquals(1, allTickets.size());
         assertTrue(allTickets.get(0).containsKey("ticket"));
     }
+
+    @SuppressWarnings("unchecked")
+    private List<String> extractErrorList(Object obj) {
+        if (obj instanceof List<?>) {
+            return (List<String>) obj;
+        }
+        throw new IllegalArgumentException("Expected List<String> but got: " + obj.getClass());
+    }
+
 }

@@ -25,17 +25,14 @@ public class BulkTicketValidationService {
         List<Map<String, Object>> responses = new ArrayList<>();
 
         for (TicketDTO ticket : tickets) {
-            // Step 1: Annotation-based validation
             Set<ConstraintViolation<TicketDTO>> violations = validator.validate(ticket);
             List<String> annotationErrors = new ArrayList<>();
             for (ConstraintViolation<TicketDTO> violation : violations) {
                 annotationErrors.add(violation.getPropertyPath() + ": " + violation.getMessage());
             }
 
-            // Step 2: Business validation
             Map<String, Object> serviceResponse = ticketService.validate(ticket);
 
-            // Step 3: Merge all errors
             List<String> allErrors = new ArrayList<>(annotationErrors);
             if (serviceResponse.containsKey("errors")) {
                 @SuppressWarnings("unchecked")
@@ -43,7 +40,6 @@ public class BulkTicketValidationService {
                 allErrors.addAll(businessErrors);
             }
 
-            // Step 4: Store once based on status
             if (!allErrors.isEmpty()) {
                 ticketService.storeRawResult(ticket, allErrors);
                 responses.add(Map.of(

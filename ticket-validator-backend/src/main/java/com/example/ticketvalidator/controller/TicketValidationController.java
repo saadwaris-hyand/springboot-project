@@ -34,7 +34,6 @@ public class TicketValidationController {
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .collect(Collectors.toList());
 
-        // Business validation (does not store)
         Map<String, Object> serviceResponse = ticketService.validate(ticket);
 
         if (serviceResponse.containsKey("errors")) {

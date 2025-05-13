@@ -15,7 +15,6 @@ public class TicketService {
     public Map<String, Object> validate(TicketDTO ticket) {
         List<String> errors = new ArrayList<>();
 
-        // Common field validation
         if (ticket.getCreatedDate() != null && ticket.getCreatedDate().isAfter(LocalDate.now())) {
             errors.add("createdDate must not be in the future");
         }
@@ -25,7 +24,6 @@ public class TicketService {
             errors.add("Invalid priority value");
         }
 
-        // Type-specific validation
         String type = ticket.getType().toUpperCase();
         switch (type) {
             case "INCIDENT" -> {

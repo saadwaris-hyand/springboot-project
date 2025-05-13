@@ -23,7 +23,6 @@ public class TicketValidationControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // ✅ Test 1: Valid single ticket
     @Test
     void shouldValidateSingleValidIncidentTicket() throws Exception {
         TicketDTO ticket = new TicketDTO();
@@ -44,17 +43,15 @@ public class TicketValidationControllerTest {
                 .andExpect(jsonPath("$.message").value("Ticket is valid"));
     }
 
-    // ❌ Test 2: Invalid input (missing required fields + invalid priority)
     @Test
     void shouldFailValidationForInvalidTicket() throws Exception {
         TicketDTO ticket = new TicketDTO();
         ticket.setType("INCIDENT");
-        ticket.setSystem(""); // Blank
-        ticket.setCreatedDate(LocalDate.now().plusDays(1)); // Future date
-        ticket.setPriority("INVALID_PRIORITY"); // Not in allowed list
-        ticket.setDescription(""); // Blank
-        ticket.setResponsible(""); // Blank
-        // Missing category and impact (type-specific fields)
+        ticket.setSystem("");
+        ticket.setCreatedDate(LocalDate.now().plusDays(1));
+        ticket.setPriority("INVALID_PRIORITY");
+        ticket.setDescription("");
+        ticket.setResponsible("");
 
         mockMvc.perform(post("/validate")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -64,7 +61,6 @@ public class TicketValidationControllerTest {
                 .andExpect(jsonPath("$.errors").isArray());
     }
 
-    // 📦 Test 3: Bulk ticket validation (1 valid + 1 invalid)
     @Test
     void shouldHandleBulkValidation() throws Exception {
         TicketDTO validTicket = new TicketDTO();
@@ -79,12 +75,11 @@ public class TicketValidationControllerTest {
 
         TicketDTO invalidTicket = new TicketDTO();
         invalidTicket.setType("CHANGE_REQUEST");
-        invalidTicket.setSystem(""); // Invalid
+        invalidTicket.setSystem("");
         invalidTicket.setCreatedDate(LocalDate.now());
         invalidTicket.setPriority("HIGH");
         invalidTicket.setDescription("Deploy patch");
         invalidTicket.setResponsible("Mark Twain");
-        // Missing planned execution date and approver
 
         List<TicketDTO> bulkTickets = List.of(validTicket, invalidTicket);
 
