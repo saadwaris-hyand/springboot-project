@@ -38,6 +38,11 @@ const App = () => {
     }
   };
 
+  const handleBulkModeChange = () => {
+    setResult(null);
+    setBulkMode(!bulkMode);
+  };
+
   return (
     <div className="container">
       <Typography variant="h4" gutterBottom>
@@ -47,7 +52,9 @@ const App = () => {
       <textarea
         value={jsonInput}
         onChange={(e) => setJsonInput(e.target.value)}
-        placeholder="Paste your JSON ticket here..."
+        placeholder={bulkMode ? 
+          "Paste your JSON array of tickets here..." : 
+          "Paste your JSON ticket here..."}
       />
 
       <Box className="controls">
@@ -55,7 +62,7 @@ const App = () => {
           control={
             <Checkbox
               checked={bulkMode}
-              onChange={() => setBulkMode(!bulkMode)}
+              onChange={handleBulkModeChange}
             />
           }
           label="Bulk Mode"
