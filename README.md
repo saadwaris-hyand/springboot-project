@@ -131,6 +131,34 @@ Base URL: `http://localhost:8080`
 }
 ```
 
+### 🔄 Bulk Mode
+#### Description:
+This enables us to check multiple tickets at once by entering them as a list of objects.
+#### Sample Input : First one is valid and the second one is valid
+```json
+[
+  {
+    "type": "INCIDENT",
+    "system": "CRM-System",
+    "created_date": "2023-04-10",
+    "priority": "HIGH",
+    "description": "Login issue for multiple users",
+    "responsible": "admin.user",
+    "category": "Access Issue",
+    "impact": "System unavailable"
+  },
+  {
+    "type": "CHANGE_REQUEST",
+    "system": "",
+    "created_date": "2026-01-01",
+    "priority": "URGENT",
+    "description": "",
+    "responsible": "",
+    "planned_execution_date": "2024-12-01",
+    "approver": ""
+  }
+]
+```
 ---
 
 ## ✅ Validation Rules
